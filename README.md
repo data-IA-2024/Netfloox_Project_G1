@@ -2,7 +2,7 @@
 Recommandation of movies by a model of artificial intelligence
 
 # Contexte et objectif du projet
-Création d'un système de recommandation de films pour le compte d'un gérant de cinéma situé dans la Creuse afin de l'aider à selectionner des films pour ses clients locaux.
+Création d'un système de recommandation de films
 
 ## Création de l'environnement virtuel sous Windows et installation des librairies et dépendances nécéssaires au bon fonctionnement du Projet 
 ```shell
