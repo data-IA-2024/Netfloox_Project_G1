@@ -25,4 +25,6 @@ Création d'un système de recommandation de films
 https://datasets.imdbws.com
 
 
+docker build -t netflooxproject .
+
 
