@@ -418,7 +418,3 @@ button_close_connexion = st.button("Fermer la connexion")
 if button_close_connexion:
     connexion.close()
     st.stop()
-
-
-
-
