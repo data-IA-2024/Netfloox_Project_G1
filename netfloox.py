@@ -19,6 +19,8 @@ from sqlalchemy import create_engine
 import joblib
 import json
 import requests
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
 
 def se_connecter_a_la_base_de_donnees():
     nom_base_de_donnees = 'postgres'
@@ -140,7 +142,7 @@ def extraire_donnees_BDD():
     return df
 
 # Afficher la selectbox pour la navigation entre les pages
-st.session_state.page = st.selectbox("Choisissez une page :", ["Accueil", "Recommandations", "Systeme de recommandation basé sur la popularité", "À propos"], index=["Accueil", "Recommandations", "Systeme de recommandation basé sur la popularité", "À propos"].index(st.session_state.page))
+st.session_state.page = st.selectbox("Choisissez une page :", ["Accueil", "Recommandations", "À propos"], index=["Accueil", "Recommandations", "À propos"].index(st.session_state.page))
 
 # Utiliser la page du session state
 page = st.session_state.page
@@ -172,24 +174,20 @@ if page == "Accueil":
             resultats = curseur.fetchall()
             return resultats
         except psycopg2.Error as e:
-            st.write(f"Erreur lors de la récupération des données: {e}")
+            st.error(f"Erreur lors de la récupération des données: {e}")
             return []
 
     if connexion:
         top_acteurs_et_films = obtenir_top_acteurs_et_films(connexion)
 
-        st.subheader("Top 5 des acteurs")
+        st.markdown("<h2 style='text-align: center;'>Top 5 des acteurs</h2>", unsafe_allow_html=True)
         for acteur, films in top_acteurs_et_films:
-            st.markdown(f"<h3><em>{acteur}</em></h3>", unsafe_allow_html=True)
-            st.write("**Films:**")
+            st.markdown(f"<h3 style='text-align: left;'><em>{acteur}</em></h3>", unsafe_allow_html=True)
+            st.write("**Films :**")
             for film in films:
                 st.write(f"- {film}")
-
-                
-    # Créer un tableau pour les top 5 des acteurs avec 2 ou 3 films respectifs
-    st.subheader("Top 5 des acteurs avec 2 ou 3 films respectifs")
-    df = pd.DataFrame(top_acteurs_et_films, columns=["Acteur", "Films"], index=range(1, 6))
-    st.table(df)
+        df = pd.DataFrame(top_acteurs_et_films, columns=["Acteur", "Films"], index=range(1, 6))
+        st.table(df)
 #----------------------------------------------------------------------------------
     # Top 5 des genres avec 2 ou 3 films respectifs
     def obtenir_top_genres_et_films(connexion):
@@ -231,23 +229,21 @@ if page == "Accueil":
         except psycopg2.Error as e:
             st.write(f"Erreur lors de la récupération des données: {e}")
             return []
+    
     if connexion:
         top_genres_et_films = obtenir_top_genres_et_films(connexion)
 
         st.subheader("Top 5 des genres avec 2 ou 3 films respectifs")
         for genre, films, avg_rating in top_genres_et_films:
-            st.markdown(f"<h3><em>{genre}</em></h3>", unsafe_allow_html=True)
-            st.write("**Films:**")
+            st.markdown(f"<h3 style='text-align: left;'><em>{genre}</em></h3>", unsafe_allow_html=True)
+            st.write("**Films :**")
             for film in films:
                 st.write(f"- {film}")
             st.write(f"Note moyenne: {avg_rating}")
-    
-    # Créer un tableau pour les top 5 des genres avec 2 ou 3 films respectifs
-    st.subheader("Top 5 des genres avec 2 ou 3 films respectifs")
-    df = pd.DataFrame(top_genres_et_films, columns=["Genre", "Films", "Note moyenne"], index=range(1, 6))
-    st.table(df)
-#----------------------------------------------------------------------------------
-    #top 5 des producters avec 2 ou 3 films respectifs
+        
+        df = pd.DataFrame(top_genres_et_films, columns=["Genre", "Films", "Note moyenne"], index=range(1, 6))
+        st.table(df)
+
     def obtenir_top_producters_et_films(connexion):
         try:
             curseur = connexion.cursor()
@@ -271,23 +267,24 @@ if page == "Accueil":
         except psycopg2.Error as e:
             st.write(f"Erreur lors de la récupération des données: {e}")
             return []
+    
     if connexion:
         top_producters_et_films = obtenir_top_producters_et_films(connexion)
 
         st.subheader("Top 5 des producteurs avec 2 ou 3 films respectifs")
         for producter, films, avg_rating in top_producters_et_films:
-            st.markdown(f"Producteur: <h3>{producter}</h3>", unsafe_allow_html=True)
-            st.write("Films:")
+            st.markdown(f"<h3 style='text-align: left;'>Producteur: <em>{producter}</em></h3>", unsafe_allow_html=True)
+            st.write("**Films :**")
             for i, film in enumerate(films):
                 if i >= 5:  # Limite à 5 films
                     break
                 st.write(f"- {film}")
             st.write(f"Note moyenne: {avg_rating}")
-    # Créer un tableau pour les top 5 des producteurs avec 2 ou 3 films respectifs
-    st.subheader("Top 5 des producteurs avec 2 ou 3 films respectifs")
-    df = pd.DataFrame(top_producters_et_films, columns=["Producteur", "Films", "Note moyenne"], index=range(1, 6))
-    st.table(df)
+        
+        df = pd.DataFrame(top_producters_et_films, columns=["Producteur", "Films", "Note moyenne"], index=range(1, 6))
+        st.table(df)
 #----------------------------------------------------------------------------------
+    st.subheader("Analyse statistique des tables")
     def observer_taux_remplissage_par_table(connexion):
         try:
             curseur = connexion.cursor()
@@ -311,11 +308,11 @@ if page == "Accueil":
                 curseur.execute(requete_taille_remplie)
                 taille_remplie_table = curseur.fetchone()[0]
             
-                taux_remplissage = taille_remplie_table / taille_table if taille_table > 0 else 0
+                taux_remplissage = (taille_remplie_table / taille_table * 100) if taille_table > 0 else 0
                 data.append([nom_table, nombre_lignes, taille_table, taille_remplie_table, taux_remplissage])
         
             df = pd.DataFrame(data, columns=["Table", "Nombre de lignes", "Taille totale", "Taille remplie", "Taux de remplissage"])
-            st.table(df)
+            st.table(df[["Table", "Nombre de lignes", "Taux de remplissage"]])
             # Afficher le taux de remplissage par table par graphique
             fig, ax = plt.subplots()
             df.plot(kind='bar', x='Table', y='Taux de remplissage', ax=ax, legend=False)
@@ -326,7 +323,6 @@ if page == "Accueil":
             curseur.close()
         except psycopg2.Error as e:
             st.write(f"Erreur lors de l'observation du taux de remplissage par table: {e}")
-            
     if connexion:
         observer_taux_remplissage_par_table(connexion)
 
@@ -334,7 +330,7 @@ elif page == "Recommandations":
     st.markdown("<h4 style='text-align: center;'>Vous ne savez pas quoi regarder ? Netfloox vous propose des recommandations en fonction de vos goûts !</h4>", unsafe_allow_html=True)
 
     film_saisie = st.text_input("Saisissez un film: ")
-    #Recommandation de film en focntion d'un film de référence
+    #Fonction pour recommander des films en fonction d'un film de référence
     def recommander_films():
         df = extraire_donnees_BDD()
 
@@ -396,17 +392,24 @@ elif page == "Recommandations":
         movie_json = json.loads(movie_data)
         st.image(movie_json.get("Poster", ""), width=150)
 
-        
-        
+    def popularite_film(film_saisie):
+        transfo_text = joblib.load("transfo_text_primaryTitle.joblib")
+
+        # Transformer le titre du film saisi
+        film_feature = transfo_text.transform([film_saisie])
+
+        # Charger le modèle préalablement entraîné
+        model = joblib.load("reglog_1.joblib")
+
+        # Prédire la popularité du film
+        resultat = model.predict(film_feature)
+        st.write(resultat)
+    #Si le film saisie est vide, on affiche un message
     if film_saisie =="":
         st.write("Vous n'avez pas saisie de film")
-    else:
+    else: #Si le film saisie n'est pas vide, on recommande des films
         recommander_films()
-        #model = joblib.load("reglog.joblib")
-        #resultat = model.predict(film_saisie)
-        #st.write(resultat)
-    #Prédiction de la popularité d'un film
-
+        popularite_film(film_saisie)
 elif page == "À propos":
     st.write("À propos de Netfloox.")
 
