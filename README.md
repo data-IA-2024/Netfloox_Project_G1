@@ -1,28 +1,41 @@
-# Netfloox_Project
-Recommandation of movies by a model of artificial intelligence
+R# Netfloox
 
-# Contexte et objectif du projet
-Création d'un système de recommandation de films
+Projet Netfloox
 
-## Création de l'environnement virtuel sous Windows et installation des librairies et dépendances nécéssaires au bon fonctionnement du Projet 
-```shell
-  # Création de l'environnement virtuel
-  python -m venv venv
-  # Activation de l'environnement virtuel
-  .\venv\Scripts\activate
-  # Installation des librairies listées dans 'requirements.txt'
-  pip install -r requirements.txt
-  # Affichage des librairies installées dans l'environnement virtuel
-  pip freeze
+## Installation / config
+
+```bash
+ python3 -m venv ENV
+ source ENV/bin/activate 
+ pip install -r requirements.txt
 ```
 
-## Lancer l'application Streamlit
-```shell
-  streamlit run streamlit_app.py
+Utilisation de fichier environnement (`variable_env/VAR.env`) 
+```text
+PATH_DONNEES = "../.."
+NOM_BASES_DONNEES = "postgres"
+USERAZURE = "psqladmin"
+PASSWORD ="*******"
+HOST = "netfloox-psqlflexibleserver-1.postgres.database.azure.com"
+PORT = "5432"
 ```
 
-## Source des données
-https://datasets.imdbws.com
+## Notebook : recommandation.ipynb
 
+Contient le cheminement, les tests pour le modèle de recommandation
 
+## Les fichiers python
 
+01.create_schema.py : Création des tables et des clefs de la database
+02.importation_data.py : Importation des données depuis les fichiers .tsv
+03.extraction_features_popularite.py : Extraction des données (pour la popularité)depuis la database et retourne un DataFrame
+04.extraction_features_recommandation.py : Extraction des features utiles au système de recommandation
+05.recommandation_cosine.py : Système de recommandation à partir d'un titre de film.
+06.create_view : Creation d'une Vue matérialisée
+
+fct_extract.py : Librairie de la fonction extraire_donnees_BDD() utilisée par 05.recommandation_cosine.py
+
+## Les fichiers sql
+
+creation_tables.sql : Requete de cration des tables de la BDD
+creation_clefs.sql : comme son nom l'indique.
