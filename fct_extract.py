@@ -9,9 +9,9 @@ from sqlalchemy import create_engine
 
 
 def extraire_donnees_BDD():
-    load_dotenv(r'Projet_NexFloox\variable_env\VAR.env')
+    load_dotenv(r'variable_env/VAR.env')
     nom_base_de_donnees = os.getenv("NOM_BASES_DONNEES")
-    utilisateur = os.getenv("USER")
+    utilisateur = os.getenv("USERAZURE")
     mot_de_passe = os.getenv("PASSWORD")   
     host = os.getenv("HOST")
     port = os.getenv("PORT")

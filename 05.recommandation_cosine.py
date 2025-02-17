@@ -11,6 +11,8 @@ import fct_extract as my_fct
 import gc
 
 
+# On choisit un titre
+title = 'Enchanted Cup'
 
 df = my_fct.extraire_donnees_BDD()
 
@@ -49,10 +51,11 @@ features_transformed = features_transformed.astype(np.float16)
 file = 'features_transformed.npy'
 np.save(file, features_transformed)
 
-# On choisit un titre
-title = 'Enchanted Cup'
+
+#On récupère l'index du film dont on recherche le titre
 movie_idx = get_index_from_title(df, title).index[0] # Index[0] permet de choisir le premier film qui sort
 
+# On charge la matrice de transformation puis on recupére le vecteur du film voulu
 X = np.load(file)
 Y = features_transformed[movie_idx, :]
 
